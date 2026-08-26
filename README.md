@@ -1,0 +1,7 @@
+# T29 — Exam Countdown Planner
+
+The Exam Countdown Planner is a Microsoft Foundry agent using `gpt-5-mini` to spread exam topics across the days remaining before an exam. The two core T29 tools are `set_exam(date)`, which stores the exam date, and `allocate_topics(topics)`, which creates the day-by-day topic schedule. The agent also includes `catch_up(missed_date)` as an extension that adjusts the existing schedule when a study day is missed. Its session memory stores the exam date, topics, and generated schedule so a later turn can act on the earlier plan.
+
+One honest failure during development was a `TypeError` from the Foundry chat client: `object LegacyAPIResponse can't be used in 'await' expression`. The agent could not complete a request because of a client/package compatibility issue. I diagnosed the traceback, corrected the required Agent Framework/Foundry package setup, restarted the Jupyter kernel, refreshed Azure CLI authentication after the computer had been asleep, and reran the notebook until the model and tool calls worked correctly.
+
+The notebook demonstrates two example goals: first, the agent receives an exam date and four topics and performs the multi-step `set_exam()` → `allocate_topics()` workflow; second, the user reports a missed Java study day and the agent calls `catch_up()` to update the existing schedule. The visible tool-call and tool-result trace, together with the memory state used by the second turn, demonstrates that the project acts through tools and state rather than only generating chatbot text.
