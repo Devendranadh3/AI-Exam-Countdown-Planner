@@ -40,10 +40,10 @@ memory = {
 
 def set_exam(date):
     """Save or update the exam date."""
-    print(f"\n TOOL CALL: set_exam({date})")
+    print(f"\n >>> TOOL CALL: set_exam({date})")
     memory["exam_date"] = date
     result = f"Exam date saved: {date}"
-    print(f" TOOL RESULT: {result}")
+    print(f" >>> TOOL RESULT: {result}")
     return result
 
 
@@ -54,15 +54,15 @@ def allocate_topics(
     ]
 ):
     """Spread topics over the available days and reserve exam day for final revision."""
-    print(f"\n TOOL CALL: allocate_topics({topics})")
+    print(f"\n >>> TOOL CALL: allocate_topics({topics})")
 
     if not memory["exam_date"]:
         result = "Please set the exam date first."
-        print(f" TOOL RESULT: {result}")
+        print(f" >>> TOOL RESULT: {result}")
         return result
     if not topics:
         result = "No topics were provided."
-        print(f" TOOL RESULT: {result}")
+        print(f" >>> TOOL RESULT: {result}")
         return result
 
     exam_date = datetime.strptime(memory["exam_date"], "%Y-%m-%d").date()
@@ -70,7 +70,7 @@ def allocate_topics(
     days_left = (exam_date - today).days
     if days_left <= 0:
         result = "The exam date has already passed."
-        print(f" TOOL RESULT: {result}")
+        print(f" >>> TOOL RESULT: {result}")
         return result
 
     base_days = days_left // len(topics)
@@ -87,17 +87,17 @@ def allocate_topics(
     schedule.append({"date": exam_date.isoformat(), "topic": "Final revision"})
     memory["topics"] = topics
     memory["schedule"] = schedule
-    print(f" TOOL RESULT: {schedule}")
+    print(f" >>> TOOL RESULT: {schedule}")
     return schedule
 
 
 def catch_up(missed_date):
     """Merge a missed study task into the next available study day."""
-    print(f"\n TOOL CALL: catch_up({missed_date})")
+    print(f"\n >>> TOOL CALL: catch_up({missed_date})")
 
     if not memory["schedule"]:
         result = "There is no study schedule to adjust."
-        print(f" TOOL RESULT: {result}")
+        print(f" >>> TOOL RESULT: {result}")
         return result
 
     missed_date_str = datetime.strptime(missed_date, "%Y-%m-%d").date().isoformat()
@@ -107,7 +107,7 @@ def catch_up(missed_date):
     ]
     if not missed_items:
         result = f"No study task was scheduled for {missed_date}."
-        print(f" TOOL RESULT: {result}")
+        print(f" >>> TOOL RESULT: {result}")
         return result
 
     memory["schedule"] = [
@@ -119,7 +119,7 @@ def catch_up(missed_date):
     ]
     if not next_days:
         result = "There are no remaining study days for catch-up."
-        print(f" TOOL RESULT: {result}")
+        print(f" >>> TOOL RESULT: {result}")
         return result
 
     catchup_date = min(next_days)
@@ -137,7 +137,7 @@ def catch_up(missed_date):
             })
 
     memory["schedule"].sort(key=lambda x: x["date"])
-    print(f" TOOL RESULT: {memory['schedule']}")
+    print(f">>> TOOL RESULT: {memory['schedule']}")
     return memory["schedule"]
 
 
@@ -162,11 +162,19 @@ Do not invent a different schedule after a planning tool returns a schedule.
 
 
 async def main():
-    response = await agent.run(
-        "My exam is on 2026-09-05. I need to study Java, OOP, SQL, and Spark."
-    )
-    print("\nFINAL AGENT RESPONSE:")
-    print(response.text)
+
+    while True:
+
+        prompt = input("\n >>> You: ")
+
+        if prompt.lower() in ["exit", "quit"]:
+            print("okay bye tata !")
+            break
+
+        response = await agent.run(prompt)
+
+        print("\n >>> Agent:")
+        print(response.text)
 
 
 if __name__ == "__main__":
